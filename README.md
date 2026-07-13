@@ -2,7 +2,9 @@
 
 **Your MIDI controls stick to whatever track you select in Ableton Live.** Turn one knob, and it always moves the *selected* track's volume — no per-set mapping, no remapping when you switch tracks.
 
-<!-- TODO: hero demo GIF — knob turns → selected track's fader moves, select another track → same knob moves that fader. -->
+![TrackMagnet demo: turning hardware knobs moves the selected track's volume and sends; selecting another track, the same knobs control that track](docs/demo-cropped.gif)
+
+*An [Expressiv MIDI Pro guitar](profiles/expressiv_midi_pro_3/)'s knobs riding volume and sends A/B — first on track 1, then, after just clicking track 2, on track 2. No mapping was configured in the set. ([Full-screen capture](docs/demo.gif).)*
 
 ![CI](https://github.com/acolbourn/trackmagnet/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
