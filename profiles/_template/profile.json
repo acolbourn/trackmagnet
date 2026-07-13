@@ -1,0 +1,13 @@
+{
+  "name": "REPLACE ME — controller make + model",
+  "controls": [
+    { "_comment": "cc: 0-127, channel: 1-16. Delete these _comment keys or keep them — they are ignored.",
+      "cc": 7, "channel": 1, "target": "selected_track_volume" },
+
+    { "_comment": "Optional extras — delete any you don't need. takeover: 'pickup' waits for the knob to catch up with the parameter before writing (no value jumps).",
+      "cc": 10, "channel": 1, "target": "selected_track_pan", "takeover": "pickup" },
+
+    { "_comment": "Sends need an index: 0 = Send A, 1 = Send B, ...",
+      "cc": 8, "channel": 1, "target": "selected_track_send", "index": 0 }
+  ]
+}

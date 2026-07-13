@@ -1,0 +1,7 @@
+{
+  "name": "Expressiv MIDI Pro 3",
+  "controls": [
+    { "_comment": "Factory default for the Expressiv's volume knob is CC7 on channel 1.",
+      "cc": 7, "channel": 1, "target": "selected_track_volume" }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Default (generic CC7 volume knob)",
+  "controls": [
+    { "cc": 7, "channel": 1, "target": "selected_track_volume" }
+  ]
+}

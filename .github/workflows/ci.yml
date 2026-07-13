@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Live 12 embeds Python 3.11 — CI must match it exactly.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tooling
+        run: pip install ruff pytest
+
+      # Live can't run headless in CI, so we validate everything static:
+      # byte-compilation on Live's exact Python version...
+      - name: Byte-compile (py_compile on 3.11)
+        run: python -m compileall -q src tools tests
+
+      # ...lint...
+      - name: Lint (ruff)
+        run: ruff check .
+
+      # ...every profile.json, using the script's own validator...
+      - name: Validate profiles
+        run: python tools/validate_profiles.py
+
+      # ...and the Live-free logic (config parsing, MIDI/value math).
+      - name: Unit tests
+        run: pytest -q

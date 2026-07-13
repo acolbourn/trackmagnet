@@ -1,0 +1,13 @@
+# Tooling config only — TrackMagnet is not a pip package; it installs by
+# copying src/TrackMagnet into Live's Remote Scripts folder.
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
