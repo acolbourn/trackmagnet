@@ -6,3 +6,6 @@ __pycache__/
 
 # Internal planning doc — keep local, not part of the public repo.
 trackmagnet_build_spec_win_live12.md
+
+# Release artifacts built locally
+*.zip
