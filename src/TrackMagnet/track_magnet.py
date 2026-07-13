@@ -78,6 +78,8 @@ class TrackMagnet:
         ``midi_map_handle`` is only valid inside this call. Channel here is
         0-indexed (0-15); profile.json uses 1-16 and Control stores both.
         """
+        if self._c_instance is None:  # late callback after disconnect
+            return
         script_handle = self._c_instance.handle()
         if self._debug:
             # Debug mode: listen to every CC on every channel so receive_midi

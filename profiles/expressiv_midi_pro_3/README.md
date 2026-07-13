@@ -19,16 +19,21 @@ turn the knob, done. No per-set MIDI mapping.
 3. Reload the script (set the Control Surface to "None" and back, or restart
    Live).
 
-## MIDI implementation
+## What this profile maps
 
-Full chart extracted from the official user guide: [midi-chart.md](midi-chart.md).
+| Guitar control | Sends | Drives on the selected track |
+|---|---|---|
+| Volume knob | CC 7 ch 1 | Volume |
+| Lower knob (below finger pads) | CC 74 ch 1 | Send A |
+| Upper knob (below finger pads) | CC 71 ch 1 | Send B |
 
-The short version: out of the box the guitar's volume knob sends **CC 7 on
-the global channel (1)** — exactly this profile's single control, so the
-stock `profile.json` bundled with TrackMagnet already works. Connect the
-guitar over USB (directly, not through a hub), set the TrackMagnet Control
-Surface's **Input** to the guitar's port, and enable **Remote** for that
-port in Live's MIDI preferences.
+Full MIDI implementation chart (from the official user guide plus
+hardware-measured values): [midi-chart.md](midi-chart.md).
+
+Connect the guitar over USB or a WIDI wireless adapter (directly, not
+through a hub), set the TrackMagnet Control Surface's **Input** to the
+guitar's port, and enable **Remote** for that port in Live's MIDI
+preferences. Sends only do something if the set has Return tracks.
 
 ## Quirks / notes
 

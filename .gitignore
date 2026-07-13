@@ -3,3 +3,6 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 .venv/
+
+# Internal planning doc — keep local, not part of the public repo.
+trackmagnet_build_spec_win_live12.md

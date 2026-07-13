@@ -204,6 +204,34 @@ def test_load_profile_invalid_json(tmp_path):
     assert profile.controls[0].cc == 7
 
 
+def test_load_profile_survives_utf16_file(tmp_path):
+    # Windows Notepad's "Unicode" encoding and PowerShell's `>` redirect both
+    # write UTF-16; the script must fall back, not die.
+    path = tmp_path / "profile.json"
+    path.write_bytes(json.dumps(make_profile()).encode("utf-16"))
+    profile = config.load_profile(str(path))
+    assert any("UTF-8" in p for p in profile.problems)
+    assert profile.controls[0].cc == 7
+
+
+def test_index_on_non_send_target_is_flagged():
+    profile = config.parse_profile(
+        make_profile(
+            controls=[{"cc": 7, "channel": 1, "target": "selected_track_volume", "index": 1}]
+        )
+    )
+    assert any("only valid for" in p for p in profile.problems)
+
+
+def test_top_level_unknown_key_flagged_but_comments_ignored():
+    profile = config.parse_profile(make_profile(debgu=True))  # typo'd "debug"
+    assert any('"debgu"' in p for p in profile.problems)
+    assert profile.debug is False
+
+    profile = config.parse_profile(make_profile(_comment="top-level comments are fine"))
+    assert profile.problems == []
+
+
 def test_load_profile_tolerates_utf8_bom(tmp_path):
     # Windows Notepad historically saves UTF-8 with a BOM.
     path = tmp_path / "profile.json"

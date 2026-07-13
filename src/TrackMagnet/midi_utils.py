@@ -15,10 +15,12 @@ def parse_cc(midi_bytes):
     """
     if len(midi_bytes) < 3:
         return None
-    status = midi_bytes[0]
+    status, data1, data2 = midi_bytes[0], midi_bytes[1], midi_bytes[2]
     if status & 0xF0 != CC_STATUS:
         return None
-    return (status & 0x0F, midi_bytes[1], midi_bytes[2])
+    if not (0 <= data1 <= 127 and 0 <= data2 <= 127):
+        return None  # malformed data bytes; never write out-of-range values
+    return (status & 0x0F, data1, data2)
 
 
 def cc_to_normalized(value):
@@ -32,9 +34,7 @@ def normalized_to_cc(value):
 
 
 def cc_to_pan(value):
-    """0-127 -> -1.0..1.0 with an exact center: 0 -> -1, 64 -> 0, 127 -> 1."""
-    if value == 64:
-        return 0.0
+    """0-127 -> -1.0..1.0: 0 -> -1, 64 -> 0 (exact center), 127 -> 1."""
     if value < 64:
         return (value - 64) / 64.0
     return (value - 64) / 63.0

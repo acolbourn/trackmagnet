@@ -20,6 +20,7 @@ VALID_TARGETS = {
 TARGETS_NEEDING_INDEX = {"selected_track_send"}
 VALID_TAKEOVER = {"jump", "pickup"}
 ALLOWED_CONTROL_KEYS = {"cc", "channel", "target", "index", "takeover"}
+ALLOWED_PROFILE_KEYS = {"name", "controls", "debug"}
 
 DEFAULT_PROFILE_NAME = "Built-in default"
 
@@ -97,6 +98,10 @@ def _validate_control(raw, position):
             problems.append(f"{where}: target \"{target}\" requires an \"index\" (0 = Send A)")
         elif not _is_int(index) or index < 0:
             problems.append(f"{where}: \"index\" must be an integer >= 0, got {index!r}")
+    elif "index" in raw:
+        problems.append(
+            f"{where}: \"index\" is only valid for {sorted(TARGETS_NEEDING_INDEX)} targets"
+        )
 
     takeover = raw.get("takeover", "jump")
     if takeover not in VALID_TAKEOVER:
@@ -119,6 +124,10 @@ def parse_profile(data):
             default_controls(),
             ["top level must be a JSON object; using default (CC 7, channel 1, volume)"],
         )
+
+    unknown = sorted(k for k in data if k not in ALLOWED_PROFILE_KEYS and not k.startswith("_"))
+    for key in unknown:
+        problems.append(f"unknown key \"{key}\" (allowed: name, controls, debug)")
 
     name = data.get("name")
     if not isinstance(name, str) or not name.strip():
@@ -176,6 +185,18 @@ def load_profile(path):
             [
                 f"profile.json is not valid JSON (line {exc.lineno}, column {exc.colno}: "
                 f"{exc.msg}); using default (CC 7, channel 1, volume)"
+            ],
+        )
+    except UnicodeDecodeError:
+        # Windows Notepad's "Unicode" encoding and PowerShell's `>` redirect
+        # both write UTF-16, which json can't read.
+        return Profile(
+            DEFAULT_PROFILE_NAME,
+            default_controls(),
+            [
+                "profile.json is not UTF-8 text — re-save it with UTF-8 encoding "
+                "(in Notepad: Save As -> Encoding: UTF-8); "
+                "using default (CC 7, channel 1, volume)"
             ],
         )
     except OSError as exc:

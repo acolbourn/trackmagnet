@@ -99,23 +99,28 @@ def live_stub():
     return _LIVE
 
 
-def make_surface(live_stub, controls=None):
+def make_surface(live_stub, controls=None, problems=None, debug=False):
+    """Create a surface; a custom profile is injected when any arg is given."""
     import TrackMagnet
     from TrackMagnet import config
     from TrackMagnet import track_magnet as tm_module
 
-    if controls is not None:
-        profile = config.Profile("Test profile", controls, [])
-        original = tm_module.config.load_profile
-        tm_module.config.load_profile = lambda path: profile
-        try:
-            c_instance = FakeCInstance(FakeSong())
-            surface = TrackMagnet.create_instance(c_instance)
-        finally:
-            tm_module.config.load_profile = original
-    else:
-        c_instance = FakeCInstance(FakeSong())
+    c_instance = FakeCInstance(FakeSong())
+    if controls is None and problems is None and not debug:
+        return TrackMagnet.create_instance(c_instance), c_instance
+
+    profile = config.Profile(
+        "Test profile",
+        controls if controls is not None else config.default_controls(),
+        problems or [],
+        debug=debug,
+    )
+    original = tm_module.config.load_profile
+    tm_module.config.load_profile = lambda path: profile
+    try:
         surface = TrackMagnet.create_instance(c_instance)
+    finally:
+        tm_module.config.load_profile = original
     return surface, c_instance
 
 
@@ -236,21 +241,7 @@ def test_pickup_waits_then_engages_and_resets_on_selection(live_stub):
 
 
 def test_debug_mode_forwards_everything_and_logs(live_stub):
-    from TrackMagnet import config
-
-    controls = config.default_controls()
-    import TrackMagnet
-    from TrackMagnet import track_magnet as tm_module
-
-    profile = config.Profile("Debug profile", controls, [], debug=True)
-    original = tm_module.config.load_profile
-    tm_module.config.load_profile = lambda path: profile
-    try:
-        c_instance = FakeCInstance(FakeSong())
-        surface = TrackMagnet.create_instance(c_instance)
-    finally:
-        tm_module.config.load_profile = original
-
+    surface, c_instance = make_surface(live_stub, debug=True)
     surface.build_midi_map(midi_map_handle=object())
     assert len(live_stub.forwarded) == 16 * 128  # every CC on every channel
 
@@ -280,6 +271,62 @@ def test_lom_write_failure_is_logged_not_raised(live_stub):
     assert any("failed to apply" in text for text in c_instance.logs)
 
 
+def test_no_selected_track_is_silent(live_stub):
+    surface, c_instance = make_surface(live_stub)
+    c_instance.song().view.selected_track = None
+    surface.receive_midi(cc(1, 7, 127))  # must neither raise nor log a failure
+    assert not any("failed to apply" in text for text in c_instance.logs)
+
+
+def test_track_without_mixer_device_is_silent(live_stub):
+    surface, c_instance = make_surface(live_stub)
+    c_instance.song().view.selected_track.mixer_device = None
+    surface.receive_midi(cc(1, 7, 127))
+    assert not any("failed to apply" in text for text in c_instance.logs)
+
+
+def test_zero_sends_track_is_silent(live_stub):
+    # The Master track's mixer has no sends at all.
+    from TrackMagnet.config import Control
+
+    surface, c_instance = make_surface(
+        live_stub,
+        controls=[Control(cc=8, channel=1, target="selected_track_send", index=0)],
+    )
+    c_instance.song().view.select(FakeTrack(send_count=0))
+    surface.receive_midi(cc(1, 8, 127))
+    assert not any("failed to apply" in text for text in c_instance.logs)
+
+
+def test_pickup_works_for_pan(live_stub):
+    from TrackMagnet.config import Control
+
+    surface, c_instance = make_surface(
+        live_stub,
+        controls=[Control(cc=10, channel=1, target="selected_track_pan", takeover="pickup")],
+    )
+    mixer = c_instance.song().view.selected_track.mixer_device
+    mixer.panning.value = 0.5  # sits at CC ~96
+
+    surface.receive_midi(cc(1, 10, 10))  # far left of it: no write
+    assert mixer.panning.value == 0.5
+    surface.receive_midi(cc(1, 10, 120))  # swept across: picked up
+    assert mixer.panning.value == pytest.approx((120 - 64) / 63.0)
+    surface.receive_midi(cc(1, 10, 64))  # engaged: follows to exact center
+    assert mixer.panning.value == 0.0
+
+
+def test_callbacks_are_safe_after_disconnect(live_stub):
+    surface, _c_instance = make_surface(live_stub, problems=["x"])  # error text armed
+    surface.disconnect()
+    # Live polls update_display ~10x/sec; a teardown-race tick must not raise,
+    # and neither must a straggling MIDI message or map rebuild.
+    for _ in range(100):
+        surface.update_display()
+    surface.receive_midi(cc(1, 7, 127))
+    surface.build_midi_map(midi_map_handle=object())
+
+
 def test_disconnect_removes_listener_and_reload_is_clean(live_stub):
     surface, c_instance = make_surface(live_stub)
     view = c_instance.song().view
@@ -298,20 +345,7 @@ def test_disconnect_removes_listener_and_reload_is_clean(live_stub):
 
 
 def test_profile_error_is_redisplayed_so_it_can_be_read(live_stub):
-    import TrackMagnet
-    from TrackMagnet import config
-    from TrackMagnet import track_magnet as tm_module
-
-    profile = config.Profile(
-        "Broken", config.default_controls(), ["controls[0]: bad thing"]
-    )
-    original = tm_module.config.load_profile
-    tm_module.config.load_profile = lambda path: profile
-    try:
-        c_instance = FakeCInstance(FakeSong())
-        surface = TrackMagnet.create_instance(c_instance)
-    finally:
-        tm_module.config.load_profile = original
+    surface, c_instance = make_surface(live_stub, problems=["controls[0]: bad thing"])
 
     error_shows = [t for t in c_instance.shows if "bad thing" in t]
     assert len(error_shows) == 1  # shown once at load

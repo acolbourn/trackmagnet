@@ -18,6 +18,13 @@ def test_parse_cc_rejects_non_cc_messages():
     assert midi_utils.parse_cc((0xB0,)) is None  # too short
 
 
+def test_parse_cc_rejects_malformed_data_bytes():
+    # Data bytes are 7-bit; anything larger must never reach a parameter write.
+    assert midi_utils.parse_cc((0xB0, 7, 200)) is None
+    assert midi_utils.parse_cc((0xB0, 200, 64)) is None
+    assert midi_utils.parse_cc((0xB0, 7, -1)) is None
+
+
 def test_cc_to_normalized_range():
     assert midi_utils.cc_to_normalized(0) == 0.0
     assert midi_utils.cc_to_normalized(127) == 1.0

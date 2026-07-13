@@ -9,8 +9,9 @@ All notable changes to this project are documented here. The format follows
 Core acceptance checklist (checks 1–9) passed on Windows 11 + Live 12.4.2
 with an Expressiv MIDI Pro over a CME WIDI uHost: load feedback, volume
 follows selection, full sweep, isolation, clean reload, and graceful
-fallback on broken JSON all verified on hardware. Extended targets
-(pan, sends, pickup takeover) are unit-tested but not yet hardware-tested.
+fallback on broken JSON all verified on hardware. `selected_track_send`
+verified on hardware too (two knobs → Sends A/B, check 11). Pan and pickup
+takeover are unit-tested but not yet hardware-tested.
 
 ### Added
 - Initial release target: raw Live 12 remote script (no `_Framework`, no
@@ -28,6 +29,10 @@ fallback on broken JSON all verified on hardware. Extended targets
   every channel and logs each incoming message to Log.txt — finds what a
   controller really sends without an external MIDI monitor fighting Live
   for the port.
+- Windows-encoding tolerance: profile.json with a UTF-8 BOM loads fine, and
+  a UTF-16 file (Notepad "Unicode", PowerShell `>` redirects) falls back to
+  the default with a clear "re-save as UTF-8" message instead of a silent
+  load failure.
 - Profile errors re-display in the status bar for ~15 seconds (Live's
   status-bar messages otherwise vanish too fast to read).
 - CI: byte-compile on Python 3.11 (Live 12's version), ruff, profile

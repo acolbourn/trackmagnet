@@ -49,7 +49,7 @@ There is also a top-level `"debug": true` option: TrackMagnet then listens to **
 
 If `profile.json` has a mistake, TrackMagnet still loads (falling back to CC 7 / channel 1 / volume) and tells you exactly what's wrong in Live's status bar and Log.txt.
 
-`selected_track_volume` is the tested v1 core. `selected_track_pan`, `selected_track_send`, and `pickup` takeover are implemented and unit-tested but young — reports welcome.
+`selected_track_volume` and `selected_track_send` are hardware-tested (Live 12.4, Windows 11, Expressiv MIDI Pro). `selected_track_pan` and `pickup` takeover are implemented and unit-tested but not yet exercised on hardware — reports welcome.
 
 ## Requirements
 
@@ -59,7 +59,7 @@ If `profile.json` has a mistake, TrackMagnet still loads (falling back to CC 7 /
 
 Copy [`profiles/_template`](profiles/_template/), edit the JSON, document the MIDI chart, open a PR — no Python required. See [docs/adding-a-profile.md](docs/adding-a-profile.md). Shipped profiles:
 
-- [Expressiv MIDI Pro 3](profiles/expressiv_midi_pro_3/) (Rob O'Reilly Guitars) — the guitar's volume knob rides the selected track.
+- [Expressiv MIDI Pro 3](profiles/expressiv_midi_pro_3/) (Rob O'Reilly Guitars) — the guitar's volume knob rides the selected track's volume, and the two knobs below the finger pads drive Sends A and B.
 
 ## Troubleshooting
 

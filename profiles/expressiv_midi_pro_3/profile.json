@@ -1,7 +1,13 @@
 {
   "name": "Expressiv MIDI Pro 3",
   "controls": [
-    { "_comment": "Factory default for the Expressiv's volume knob is CC7 on channel 1.",
-      "cc": 7, "channel": 1, "target": "selected_track_volume" }
+    { "_comment": "Volume knob (factory default CC7) -> selected track volume.",
+      "cc": 7, "channel": 1, "target": "selected_track_volume" },
+
+    { "_comment": "Lower knob below the finger pads (sends CC74) -> Send A.",
+      "cc": 74, "channel": 1, "target": "selected_track_send", "index": 0 },
+
+    { "_comment": "Upper knob below the finger pads (sends CC71) -> Send B.",
+      "cc": 71, "channel": 1, "target": "selected_track_send", "index": 1 }
   ]
 }

@@ -16,8 +16,10 @@ jobs:
         with:
           python-version: "3.11"
 
+      # Pinned so a new ruff release adding lint rules can't turn CI red on
+      # an unchanged repo. Bump deliberately.
       - name: Install tooling
-        run: pip install ruff pytest
+        run: pip install ruff==0.15.21 pytest==8.3.3
 
       # Live can't run headless in CI, so we validate everything static:
       # byte-compilation on Live's exact Python version...

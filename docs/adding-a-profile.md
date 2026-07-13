@@ -9,12 +9,15 @@ MIDI implementation. Adding one requires **zero Python**.
 1. **Copy the template:** duplicate `profiles/_template/` as
    `profiles/<maker_model>/` (lowercase, underscores — e.g.
    `profiles/akai_mpk_mini_3/`).
-2. **Find out what the controller really sends.** Use a MIDI monitor
-   (MIDI-OX, Pocket MIDI) and move every control you care about. Note the CC
-   number, the channel (1–16 as displayed), and whether the control is an
-   absolute pot (sends 0–127) or an endless/relative encoder. **TrackMagnet
-   v1 expects absolute values** — if the encoder has an absolute mode, use
-   it and note how to enable it.
+2. **Find out what the controller really sends.** Easiest way: add
+   `"debug": true` to the top level of your installed `profile.json`,
+   reload the script, move every control you care about, and read Log.txt —
+   each incoming CC is logged with its number, channel (1–16), and value.
+   (An external MIDI monitor like MIDI-OX works too, but it fights Live for
+   the port on Windows.) Note whether each control is an absolute pot
+   (sweeps 0–127) or an endless/relative encoder. **TrackMagnet v1 expects
+   absolute values** — if the encoder has an absolute mode, use it and note
+   how to enable it. Turn `debug` off when done.
 3. **Edit `profile.json`.** One entry per control:
 
    ```json
